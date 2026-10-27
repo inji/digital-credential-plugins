@@ -318,6 +318,29 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
+    public void getVerifiableCredentialWithLinkedDataProof_UnsupportedContextURL_ThenFailWithReadableMessage() throws JsonProcessingException {
+        VCRequestDto vcRequestDto=new VCRequestDto();
+        vcRequestDto.setContext(List.of("https://www.w3.org/ns/credentials/v2"));
+        vcRequestDto.setFormat("ldp_vc");
+        List<String> types=new ArrayList<>();
+        types.add("VerifiableCredential");
+        types.add("InsuranceCredential");
+        vcRequestDto.setType(types);
+
+        Map<String,Object> identityMap=new HashMap<>();
+        identityMap.put("sub","osid");
+        Map<String,Object> templateMap=new HashMap<>();
+        templateMap.put("@context",List.of("https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1"));
+        Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenReturn(templateMap);
+
+        VCIExchangeException e = Assert.assertThrows(VCIExchangeException.class, () ->
+                sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto,"holderId",identityMap));
+        Assert.assertEquals(ErrorConstants.VCI_EXCHANGE_FAILED, e.getErrorCode());
+        Assert.assertEquals("vci_exchange_failed -> The requested credential context https://www.w3.org/ns/credentials/v2 is not supported for this credential.",
+                e.getMessage());
+    }
+
+    @Test
     public void getVerifiableCredentialWithLinkedDataProof_InvalidTemplate_ThenFail() throws  JsonProcessingException {
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
         VCRequestDto vcRequestDto=new VCRequestDto();

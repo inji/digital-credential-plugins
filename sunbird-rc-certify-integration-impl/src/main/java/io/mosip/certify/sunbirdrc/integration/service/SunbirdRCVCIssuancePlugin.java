@@ -335,7 +335,8 @@ private void validateContextUrl(Template template,List<String> vcRequestContextL
             log.info("Validating contextUrl: {}", contextUrl);
             if(!contextList.contains(contextUrl)){
                 log.error("ContextUrl is not supported");
-                throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
+                throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED,
+                        "The requested credential context " + contextUrl + " is not supported for this credential.");
             }
         }
     }catch ( JsonProcessingException e){
