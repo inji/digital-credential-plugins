@@ -76,7 +76,7 @@ public class IdaVCIssuancePluginImplTest {
 
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ldp_vc");
-        vcRequestDto.setContext(Arrays.asList("context1","context2"));
+        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/2018/credentials/v1","https://inji.github.io/inji-config/contexts/mosip-identity-context.json"));
         vcRequestDto.setType(Arrays.asList("VerifiableCredential"));
         vcRequestDto.setCredentialSubject(Map.of("subject1","subject1","subject2","subject2"));
 
@@ -126,7 +126,7 @@ public class IdaVCIssuancePluginImplTest {
 
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ldp_vc");
-        vcRequestDto.setContext(Arrays.asList("context1","context2"));
+        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/2018/credentials/v1","https://inji.github.io/inji-config/contexts/mosip-identity-context.json"));
         vcRequestDto.setType(Arrays.asList("VerifiableCredential"));
         vcRequestDto.setCredentialSubject(Map.of("subject1","subject1","subject2","subject2"));
 
@@ -188,7 +188,7 @@ public class IdaVCIssuancePluginImplTest {
 
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ld_vc");
-        vcRequestDto.setContext(Arrays.asList("context1","context2"));
+        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/2018/credentials/v1","https://inji.github.io/inji-config/contexts/mosip-identity-context.json"));
         vcRequestDto.setType(Arrays.asList("VerifiableCredential"));
         vcRequestDto.setCredentialSubject(Map.of("subject1","subject1","subject2","subject2"));
 
@@ -215,7 +215,7 @@ public class IdaVCIssuancePluginImplTest {
 
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ldp_vc");
-        vcRequestDto.setContext(Arrays.asList("context1","context2"));
+        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/2018/credentials/v1","https://inji.github.io/inji-config/contexts/mosip-identity-context.json"));
         vcRequestDto.setType(Arrays.asList("VerifiableCredential"));
         vcRequestDto.setCredentialSubject(Map.of("subject1","subject1","subject2","subject2"));
 
@@ -245,7 +245,7 @@ public class IdaVCIssuancePluginImplTest {
 
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ldp_vc");
-        vcRequestDto.setContext(Arrays.asList("context1","context2"));
+        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/2018/credentials/v1","https://inji.github.io/inji-config/contexts/mosip-identity-context.json"));
         vcRequestDto.setType(Arrays.asList("VerifiableCredential"));
         vcRequestDto.setCredentialSubject(Map.of("subject1","subject1","subject2","subject2"));
 
@@ -311,14 +311,14 @@ public class IdaVCIssuancePluginImplTest {
     public void getVerifiableCredentialWithLinkedDataProof_withVcdm2Context_thenFailBeforeCallingIda() {
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ldp_vc");
-        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/2018/credentials/v1", "https://www.w3.org/ns/credentials/v2"));
+        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/ns/credentials/v2"));
         vcRequestDto.setType(Arrays.asList("VerifiableCredential", "MOSIPVerifiableCredential"));
 
         VCIExchangeException e = Assert.assertThrows(VCIExchangeException.class, () ->
                 idaVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto, "holderId", new HashMap<>()));
 
         Assert.assertEquals(ErrorConstants.VCI_EXCHANGE_FAILED, e.getErrorCode());
-        Assert.assertEquals("vci_exchange_failed -> The credential configuration's context https://www.w3.org/ns/credentials/v2 is not supported by the issuer.",
+        Assert.assertEquals("vci_exchange_failed -> The credential configuration's context https://www.w3.org/ns/credentials/v2 is not supported by the issuer. It issues https://www.w3.org/2018/credentials/v1 credentials only.",
                 e.getMessage());
         Mockito.verifyNoInteractions(restTemplate);
     }
@@ -339,6 +339,7 @@ public class IdaVCIssuancePluginImplTest {
 
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ldp_vc");
+        vcRequestDto.setContext(List.of("https://www.w3.org/2018/credentials/v1"));
 
         OIDCTransaction oidcTransaction = new OIDCTransaction();
         oidcTransaction.setIndividualId("individualId");
@@ -368,6 +369,7 @@ public class IdaVCIssuancePluginImplTest {
 
         VCRequestDto vcRequestDto = new VCRequestDto();
         vcRequestDto.setFormat("ldp_vc");
+        vcRequestDto.setContext(List.of("https://www.w3.org/2018/credentials/v1"));
 
         OIDCTransaction oidcTransaction = new OIDCTransaction();
         oidcTransaction.setIndividualId("individualId");

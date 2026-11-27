@@ -57,7 +57,7 @@ public class IdaVCIssuancePluginImpl implements VCIssuancePlugin {
 	public static final String OIDC_SERVICE_APP_ID = "CERTIFY_SERVICE";
 	public static final String AES_CIPHER_FAILED = "aes_cipher_failed";
 	public static final String NO_UNIQUE_ALIAS = "no_unique_alias";
-	private static final String VCDM2_CONTEXT = "https://www.w3.org/ns/credentials/v2";
+	private static final String SUPPORTED_VC_CONTEXT = "https://www.w3.org/2018/credentials/v1";
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -164,11 +164,13 @@ public class IdaVCIssuancePluginImpl implements VCIssuancePlugin {
 		throw new VCIExchangeException(ErrorConstants.NOT_IMPLEMENTED);
 	}
 
-	// IDA's VCI exchange issues VCDM 1.1 only (@context from its own config, always issuanceDate); revisit if IDA adds 2.0.
+	// IDA's VCI exchange issues VCDM 1.1 only (@context from its own config, always issuanceDate); update when IDA adds 2.0.
 	private void validateContext(List<String> context) throws VCIExchangeException {
-		if (context != null && context.contains(VCDM2_CONTEXT)) {
+		if (context == null || !context.contains(SUPPORTED_VC_CONTEXT)) {
+			String requested = context == null || context.isEmpty() ? "(none)" : String.join(", ", context);
 			throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED,
-					"The credential configuration's context " + VCDM2_CONTEXT + " is not supported by the issuer.");
+					"The credential configuration's context " + requested + " is not supported by the issuer. "
+							+ "It issues " + SUPPORTED_VC_CONTEXT + " credentials only.");
 		}
 	}
 
