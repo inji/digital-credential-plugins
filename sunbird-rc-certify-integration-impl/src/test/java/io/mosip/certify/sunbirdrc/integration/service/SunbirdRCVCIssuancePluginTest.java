@@ -336,7 +336,7 @@ public class SunbirdRCVCIssuancePluginTest {
         VCIExchangeException e = Assert.assertThrows(VCIExchangeException.class, () ->
                 sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto,"holderId",identityMap));
         Assert.assertEquals(ErrorConstants.VCI_EXCHANGE_FAILED, e.getErrorCode());
-        Assert.assertEquals("vci_exchange_failed -> The requested credential context https://www.w3.org/ns/credentials/v2 is not supported for this credential.",
+        Assert.assertEquals("vci_exchange_failed -> The credential configuration's context https://www.w3.org/ns/credentials/v2 is not supported by the issuer.",
                 e.getMessage());
     }
 
