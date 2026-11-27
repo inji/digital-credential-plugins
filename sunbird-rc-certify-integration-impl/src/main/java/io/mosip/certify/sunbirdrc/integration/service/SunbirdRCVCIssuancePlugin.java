@@ -151,12 +151,8 @@ public class SunbirdRCVCIssuancePlugin implements VCIssuancePlugin {
             log.error("Credential type is not supported");
             throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED);
         }
-        //Validate context of vcrequestdto with template
-        List<String> contextList=vcRequestDto.getContext();
-        for(String supportedType:supportedCredentialTypes){
-            Template template=  credentialTypeTemplates.get(supportedType);
-            validateContextUrl(template,contextList);
-        }
+        //Validate context of vcrequestdto with the requested type's template only.
+        validateContextUrl(credentialTypeTemplates.get(requestedCredentialType), vcRequestDto.getContext());
 
         String registrySearchField = (identityDetails.containsKey("sub")) ? (String) identityDetails.get("sub") : null;
         if (registrySearchField == null) {

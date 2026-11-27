@@ -341,6 +341,48 @@ public class SunbirdRCVCIssuancePluginTest {
     }
 
     @Test
+    public void getVerifiableCredentialWithLinkedDataProof_OtherSupportedTypeLacksRequestedContext_ThenValidateOnlyRequestedType() throws VCIExchangeException, JsonProcessingException {
+        // Two supported types whose templates carry different @context lists. The request is for
+        // InsuranceCredential with the insurance context, which the LifeInsuranceCredential template
+        // does not have. Only the requested type's template may decide whether the context is supported.
+        Template lifeTemplate=velocityEngine.getTemplate("LifeInsuranceCredential.json");
+        credentialTypeTemplatesMap.put("LifeInsuranceCredential",lifeTemplate);
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"supportedCredentialTypes",List.of("InsuranceCredential","LifeInsuranceCredential"));
+        ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
+
+        VCRequestDto vcRequestDto=new VCRequestDto();
+        List<String> insuranceContext=List.of("https://www.w3.org/2018/credentials/v1","https://holashchand.github.io/test_project/insurance-context.json");
+        vcRequestDto.setContext(insuranceContext);
+        vcRequestDto.setFormat("ldp_vc");
+        List<String> types=new ArrayList<>();
+        types.add("VerifiableCredential");
+        types.add("InsuranceCredential");
+        vcRequestDto.setType(types);
+
+        Map<String,Object> identityMap=new HashMap<>();
+        identityMap.put("sub","osid");
+
+        ResponseEntity<Map<String,Object>> responseEntity = new ResponseEntity(Map.of("policyNumber","654321","dob","654321"), HttpStatus.OK);
+        Mockito.when(restTemplate.exchange(
+                Mockito.any(RequestEntity.class),
+                Mockito.eq(new ParameterizedTypeReference<Map<String,Object>>() {}))).thenReturn(responseEntity);
+
+        Map<String,Object> insuranceTemplateMap=new HashMap<>();
+        insuranceTemplateMap.put("@context",insuranceContext);
+        insuranceTemplateMap.put("credentialSubject",new HashMap<>());
+        Map<String,Object> lifeTemplateMap=new HashMap<>();
+        lifeTemplateMap.put("@context",List.of("https://www.w3.org/2018/credentials/v1","https://example.com/contexts/life-insurance-context.json"));
+        // Parse each merged template to its own map so the two templates can be told apart.
+        Mockito.when(objectMapper.readValue(Mockito.anyString(),Mockito.eq(Map.class))).thenAnswer(invocation ->
+                ((String) invocation.getArgument(0)).contains("life-insurance-context") ? lifeTemplateMap : insuranceTemplateMap);
+
+        VCResult<JsonLDObject> result=sunbirdRCVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto,"holderId",identityMap);
+
+        Assert.assertNotNull(result);
+        Mockito.verify(objectMapper,Mockito.never()).readValue(Mockito.contains("life-insurance-context"),Mockito.eq(Map.class));
+    }
+
+    @Test
     public void getVerifiableCredentialWithLinkedDataProof_InvalidTemplate_ThenFail() throws  JsonProcessingException {
         ReflectionTestUtils.setField(sunbirdRCVCIssuancePlugin,"issueCredentialUrl","https://test.com");
         VCRequestDto vcRequestDto=new VCRequestDto();
