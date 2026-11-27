@@ -308,6 +308,22 @@ public class IdaVCIssuancePluginImplTest {
     }
 
     @Test
+    public void getVerifiableCredentialWithLinkedDataProof_withVcdm2Context_thenFailBeforeCallingIda() {
+        VCRequestDto vcRequestDto = new VCRequestDto();
+        vcRequestDto.setFormat("ldp_vc");
+        vcRequestDto.setContext(Arrays.asList("https://www.w3.org/2018/credentials/v1", "https://www.w3.org/ns/credentials/v2"));
+        vcRequestDto.setType(Arrays.asList("VerifiableCredential", "MOSIPVerifiableCredential"));
+
+        VCIExchangeException e = Assert.assertThrows(VCIExchangeException.class, () ->
+                idaVCIssuancePlugin.getVerifiableCredentialWithLinkedDataProof(vcRequestDto, "holderId", new HashMap<>()));
+
+        Assert.assertEquals(ErrorConstants.VCI_EXCHANGE_FAILED, e.getErrorCode());
+        Assert.assertEquals("vci_exchange_failed -> The credential configuration's context https://www.w3.org/ns/credentials/v2 is not supported by the issuer.",
+                e.getMessage());
+        Mockito.verifyNoInteractions(restTemplate);
+    }
+
+    @Test
     public void getVerifiableCredential_shouldThrowNotImplementedException() {
         try {
             idaVCIssuancePlugin.getVerifiableCredential(new VCRequestDto(), "holderId", Map.of());

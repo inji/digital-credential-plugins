@@ -57,6 +57,7 @@ public class IdaVCIssuancePluginImpl implements VCIssuancePlugin {
 	public static final String OIDC_SERVICE_APP_ID = "CERTIFY_SERVICE";
 	public static final String AES_CIPHER_FAILED = "aes_cipher_failed";
 	public static final String NO_UNIQUE_ALIAS = "no_unique_alias";
+	private static final String VCDM2_CONTEXT = "https://www.w3.org/ns/credentials/v2";
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -104,6 +105,7 @@ public class IdaVCIssuancePluginImpl implements VCIssuancePlugin {
 	public VCResult<JsonLDObject> getVerifiableCredentialWithLinkedDataProof(VCRequestDto vcRequestDto, String holderId,
 																			 Map<String, Object> identityDetails) throws VCIExchangeException {
 		log.info("Started to created the VCIssuance");
+		validateContext(vcRequestDto.getContext());
 		try {
 			OIDCTransaction transaction = transactionHelper
 					.getOAuthTransaction(identityDetails.get(ACCESS_TOKEN_HASH).toString());
@@ -160,6 +162,14 @@ public class IdaVCIssuancePluginImpl implements VCIssuancePlugin {
 	public VCResult<String> getVerifiableCredential(VCRequestDto vcRequestDto, String holderId,
 													Map<String, Object> identityDetails) throws VCIExchangeException {
 		throw new VCIExchangeException(ErrorConstants.NOT_IMPLEMENTED);
+	}
+
+	// IDA's VCI exchange issues VCDM 1.1 only (@context from its own config, always issuanceDate); revisit if IDA adds 2.0.
+	private void validateContext(List<String> context) throws VCIExchangeException {
+		if (context != null && context.contains(VCDM2_CONTEXT)) {
+			throw new VCIExchangeException(ErrorConstants.VCI_EXCHANGE_FAILED,
+					"The credential configuration's context " + VCDM2_CONTEXT + " is not supported by the issuer.");
+		}
 	}
 
 	protected String getIndividualId(String encryptedIndividualId) throws Exception {
